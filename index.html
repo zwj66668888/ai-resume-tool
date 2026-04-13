@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>AI简历初筛助手</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 900px;
+      margin: 40px auto;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+<h1>AI简历初筛助手</h1>
+<p>输入JD和简历，生成评估结果（演示版）</p>
+
+<h3>岗位JD</h3>
+<textarea id="jd"></textarea>
+
+<h3>候选人简历</h3>
+<textarea id="resume"></textarea>
+
+<button onclick="analyze()">开始评估</button>
+
+<div class="result" id="result"></div>
+
+<script>
+function analyze() {
+  const result = `
+  <h3>评估结果</h3>
+  <p><b>总分：</b>32 / 40</p>
+  <p><b>匹配度：</b>A</p>
+  <p><b>建议：</b>建议进入面试</p>
+
+  <h4>优势</h4>
+  <ul>
+    <li>有内容运营经验</li>
+    <li>熟悉小红书</li>
+    <li>使用过AI工具</li>
+  </ul>
+
+  <h4>风险点</h4>
+  <ul>
+    <li>数据成果不明确</li>
+  </ul>
+
+  <h4>面试问题</h4>
+  <ul>
+    <li>你如何做内容增长？</li>
+    <li>你使用过哪些AI工具？</li>
+  </ul>
+  `;
+
+  document.getElementById("result").innerHTML = result;
+}
+</script>
+
+</body>
+</html>
