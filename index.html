@@ -1,76 +1,581 @@
 <!DOCTYPE html>
 
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI简历初筛助手</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial;
-      max-width: 900px;
-      margin: 40px auto;
+      margin: 0;
+      font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f6f8fc;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #ffffff 0%, #f4f7ff 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 36px;
+      line-height: 1.2;
+    }
+    .subtitle {
+      margin: 0;
+      color: #6b7280;
+      font-size: 16px;
+      line-height: 1.8;
+      max-width: 820px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 24px;
+    }
+    .panel, .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    .panel h3, .card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    .desc {
+      margin: 0 0 14px;
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.7;
     }
     textarea {
       width: 100%;
-      height: 120px;
-      margin-bottom: 10px;
+      min-height: 280px;
+      resize: vertical;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.7;
+      outline: none;
+      background: #fcfcfd;
+    }
+    textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+      background: #fff;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0 10px;
     }
     button {
-      padding: 10px 20px;
-      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease;
     }
-    .result {
-      margin-top: 20px;
-      padding: 15px;
-      border: 1px solid #ddd;
+    button:hover { transform: translateY(-1px); }
+    .primary {
+      background: #111827;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(17, 24, 39, 0.18);
     }
+    .secondary {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+    .ghost {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    .loading {
+      display: none;
+      color: #4b5563;
+      font-size: 14px;
+      margin: 8px 0 4px;
+    }
+    .loading.show { display: block; }
+    .result-wrap {
+      display: none;
+      margin-top: 26px;
+    }
+    .result-wrap.show { display: block; }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .section-title h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #ecfeff;
+      color: #0f766e;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .metric-title {
+      margin: 0 0 8px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+    .metric-value {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .score-high { color: #059669; }
+    .score-mid { color: #d97706; }
+    .score-low { color: #dc2626; }
+
+```
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.score-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 16px;
+}
+.score-item .name {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.score-item .value {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.bar {
+  height: 8px;
+  background: #eef2f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: #6366f1;
+  border-radius: 999px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+ul {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+.question-list li {
+  margin-bottom: 10px;
+}
+.report-box {
+  white-space: pre-wrap;
+  line-height: 1.9;
+  color: #374151;
+  font-size: 14px;
+}
+.footer-note {
+  margin-top: 18px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+@media (max-width: 960px) {
+  .grid, .two-col, .metrics, .score-grid {
+    grid-template-columns: 1fr;
+  }
+  h1 { font-size: 28px; }
+  textarea { min-height: 220px; }
+}
+```
+
   </style>
 </head>
 <body>
+  <div class="container">
+    <section class="hero">
+      <div class="badge">AI 招聘产品作品 Demo</div>
+      <h1>AI简历初筛助手</h1>
+      <p class="subtitle">
+        面向校招运营 / 招聘运营岗位的候选人评估工具。支持基于岗位JD对候选人进行初筛打分、能力摘要、风险识别与面试问题生成，用于提升筛选效率与标准一致性。
+      </p>
+    </section>
 
-<h1>AI简历初筛助手</h1>
-<p>输入JD和简历，生成评估结果（演示版）</p>
+```
+<section class="grid">
+  <div class="panel">
+    <h3>岗位JD</h3>
+    <p class="desc">粘贴目标岗位的岗位描述，用于识别能力要求、筛选维度与面试验证重点。</p>
+    <textarea id="jd" placeholder="请粘贴岗位JD..."></textarea>
+  </div>
 
-<h3>岗位JD</h3>
-<textarea id="jd"></textarea>
+  <div class="panel">
+    <h3>候选人简历</h3>
+    <p class="desc">粘贴候选人的简历内容，支持教育背景、实习经历、项目经历、技能和自我评价等。</p>
+    <textarea id="resume" placeholder="请粘贴候选人简历..."></textarea>
+  </div>
+</section>
 
-<h3>候选人简历</h3>
-<textarea id="resume"></textarea>
+<div class="actions">
+  <button class="primary" onclick="analyze()">开始评估</button>
+  <button class="secondary" onclick="fillDemo()">填入示例数据</button>
+  <button class="ghost" onclick="resetAll()">重新评估</button>
+  <button class="ghost" onclick="copyReport()">复制报告</button>
+</div>
 
-<button onclick="analyze()">开始评估</button>
+<div class="loading" id="loading">AI正在分析候选人与岗位的匹配情况，请稍候...</div>
 
-<div class="result" id="result"></div>
+<section class="result-wrap" id="resultWrap">
+  <div class="section-title">
+    <h2>候选人评估结果</h2>
+    <span class="tag">适合面试展示</span>
+  </div>
 
-<script>
-function analyze() {
-  const result = `
-  <h3>评估结果</h3>
-  <p><b>总分：</b>32 / 40</p>
-  <p><b>匹配度：</b>A</p>
-  <p><b>建议：</b>建议进入面试</p>
+  <div class="metrics">
+    <div class="card">
+      <p class="metric-title">综合评分</p>
+      <p class="metric-value score-high" id="scoreValue">32 / 40</p>
+    </div>
+    <div class="card">
+      <p class="metric-title">匹配等级</p>
+      <p class="metric-value" id="levelValue">A</p>
+    </div>
+    <div class="card">
+      <p class="metric-title">筛选建议</p>
+      <p class="metric-value" style="font-size: 22px;" id="adviceValue">建议进入面试</p>
+    </div>
+    <div class="card">
+      <p class="metric-title">岗位方向</p>
+      <p class="metric-value" style="font-size: 20px;">校招运营</p>
+    </div>
+  </div>
 
-  <h4>优势</h4>
-  <ul>
-    <li>有内容运营经验</li>
-    <li>熟悉小红书</li>
-    <li>使用过AI工具</li>
-  </ul>
+  <div class="card" style="margin-bottom:16px;">
+    <h3>候选人关键信息提炼</h3>
+    <div class="report-box" id="summaryText"></div>
+  </div>
 
-  <h4>风险点</h4>
-  <ul>
-    <li>数据成果不明确</li>
-  </ul>
+  <div class="section-title">
+    <h2 style="font-size:20px;">评分维度</h2>
+  </div>
 
-  <h4>面试问题</h4>
-  <ul>
-    <li>你如何做内容增长？</li>
-    <li>你使用过哪些AI工具？</li>
-  </ul>
-  `;
+  <div class="score-grid" id="scoreGrid"></div>
 
-  document.getElementById("result").innerHTML = result;
-}
-</script>
+  <div class="two-col">
+    <div class="card">
+      <h3>最强匹配点</h3>
+      <ul id="strengthList"></ul>
+    </div>
+    <div class="card">
+      <h3>主要风险点</h3>
+      <ul id="riskList"></ul>
+    </div>
+    <div class="card full">
+      <h3>建议重点验证的面试问题</h3>
+      <ul class="question-list" id="questionList"></ul>
+    </div>
+    <div class="card full">
+      <h3>结构化评估报告</h3>
+      <div class="report-box" id="reportText"></div>
+    </div>
+  </div>
+</section>
+
+<p class="footer-note">
+  本工具用于展示 AI 在招聘筛选场景中的流程设计、Prompt 结构化能力与产品化思路。
+</p>
+```
+
+  </div>
+
+  <script>
+    function fillDemo() {
+      document.getElementById("jd").value =
+`岗位名称：校招运营 / 招聘运营实习生
+
+岗位职责：
+1. 负责校园招聘相关内容策划与传播，包括小红书、B站、公众号等平台内容运营；
+2. 协助进行候选人简历初筛、人才沟通、面试安排与交付跟进；
+3. 参与校园社群运营、雇主品牌内容优化和活动执行；
+4. 探索AI工具在招聘提效、内容生成和流程优化中的应用。
+
+任职要求：
+1. 有内容运营、校园社群、活动策划或用户增长经验优先；
+2. 对00后表达方式、校园人群心理和平台生态有理解；
+3. 熟悉小红书、B站、公众号等内容平台；
+4. 对AI工具有兴趣，有实际使用经验优先；
+5. 沟通表达强，自驱力强，有Owner意识。`;
+
+      document.getElementById("resume").value =
+`候选人姓名：张同学
+
+教育背景：
+华东师范大学，广告学，本科，2025届
+
+实习经历：
+1. 某消费品牌内容运营实习生
+- 负责小红书选题策划、笔记撰写和数据复盘；
+- 参与账号内容排期，单篇笔记最高互动提升35%；
+- 协助搭建校园KOC合作名单，跟进达人沟通与内容上线。
+
+2. 某互联网公司招聘运营实习生
+- 协助进行校招简历筛选、候选人沟通与面试安排；
+- 维护候选人进度表，跟进面试反馈与到面情况；
+- 使用ChatGPT辅助整理岗位亮点和面试问题草案。
+
+项目经历：
+- 负责学院公众号专题策划，完成3次校园热点选题；
+- 自主运营小红书账号，累计发布40+内容；
+- 使用AI工具辅助做文案初稿、标题优化和信息整理。
+
+技能：
+- 熟悉小红书、公众号内容运营；
+- 会使用ChatGPT、Notion、飞书；
+- 具备基础数据复盘能力和较强沟通执行能力。`;
+    }
+
+    function analyze() {
+      const jd = document.getElementById("jd").value.trim();
+      const resume = document.getElementById("resume").value.trim();
+
+      if (!jd || !resume) {
+        alert("请先填写岗位JD和候选人简历，再开始评估。");
+        return;
+      }
+
+      const loading = document.getElementById("loading");
+      const resultWrap = document.getElementById("resultWrap");
+
+      loading.classList.add("show");
+      resultWrap.classList.remove("show");
+
+      setTimeout(() => {
+        const hasAI = /AI|ChatGPT|GPT|自动化|Midjourney/i.test(resume);
+        const hasXHS = /小红书/.test(resume);
+        const hasRecruiting = /招聘|简历筛选|候选人|面试安排|招聘运营/.test(resume);
+        const hasData = /数据|复盘|提升|转化|增长|互动/.test(resume);
+        const hasCampus = /校园|社群|公众号|B站|活动策划/.test(resume);
+        const hasContent = /内容运营|选题|文案|笔记|传播/.test(resume);
+        const hasCommunication = /沟通|协作|跟进|对接/.test(resume);
+
+        const scores = {
+          contentOps: hasContent ? 5 : 3,
+          recruiting: hasRecruiting ? 5 : 2,
+          genz: hasCampus ? 4 : 2,
+          ai: hasAI ? 4 : 1,
+          expression: hasContent ? 4 : 3,
+          data: hasData ? 4 : 2,
+          ownership: hasCommunication ? 4 : 3,
+          overall: 0
+        };
+
+        scores.overall = Math.round(
+          (scores.contentOps + scores.recruiting + scores.genz + scores.ai + scores.expression + scores.data + scores.ownership) / 7
+        );
+
+        let total = scores.contentOps + scores.recruiting + scores.genz + scores.ai + scores.expression + scores.data + scores.ownership + scores.overall;
+        if (total > 40) total = 40;
+
+        let level = "C";
+        let advice = "可备选";
+        let scoreClass = "score-mid";
+
+        if (total >= 32) {
+          level = "A";
+          advice = "建议进入面试";
+          scoreClass = "score-high";
+        } else if (total >= 26) {
+          level = "B";
+          advice = "建议进一步评估";
+          scoreClass = "score-mid";
+        } else {
+          level = "C";
+          advice = "暂不优先推进";
+          scoreClass = "score-low";
+        }
+
+        const strengths = [];
+        if (hasContent) strengths.push("具备较强内容运营相关经验，与岗位核心要求直接相关。");
+        if (hasXHS) strengths.push("熟悉小红书等目标平台，具备内容表达和平台适配能力。");
+        if (hasRecruiting) strengths.push("有招聘运营或简历筛选协助经验，理解候选人推进流程。");
+        if (hasAI) strengths.push("已体现出AI工具使用意识，符合岗位对提效与创新能力的要求。");
+        if (hasCampus) strengths.push("有校园、社群或青年用户相关经验，较容易理解00后目标人群。");
+        if (hasData) strengths.push("具备一定数据复盘或结果意识，不只是纯执行型经历。");
+        if (strengths.length < 3) strengths.push("简历整体相关性尚可，具备一定培养空间。");
+
+        const risks = [
+          "部分经历仍偏职责描述，量化成果与影响范围可进一步明确。",
+          "内容增长方法论和实际操盘深度，需要在面试中继续验证。"
+        ];
+        if (!hasAI) {
+          risks.push("AI能力暂未形成清晰证据，可能更多停留在了解阶段。");
+        } else {
+          risks.push("AI使用场景目前偏辅助型，需要进一步确认是否具备方法沉淀。");
+        }
+
+        const questions = [
+          "请具体讲一个你做过的内容运营项目，你是如何选题、执行和复盘的？",
+          "你在小红书或校园内容传播中，如何判断什么样的表达更能吸引00后用户？",
+          "你实际使用过哪些AI工具？分别帮你提升了哪些环节的效率？",
+          "如果让你为一个校招岗位做一周的内容增长测试，你会如何设计动作和指标？",
+          "你在招聘流程协助中，遇到过哪些推进难点？你是如何解决的？",
+          "你如何平衡内容吸引力和招聘转化之间的关系？"
+        ];
+
+        const summary = [
+          "1. 教育背景：简历中具备基础学历信息，整体背景与校招运营方向可衔接。",
+          "2. 岗位相关经历：候选人同时具备内容运营与招聘流程协助经验，相关性较高。",
+          "3. 平台与人群理解：包含小红书、公众号、校园内容或社群经历，对年轻用户表达有一定基础。",
+          "4. AI使用痕迹：已体现ChatGPT或AI辅助使用经验，符合岗位对AI敏感度的要求。",
+          "5. 综合判断：候选人适合进入面试验证内容操盘深度、AI提效能力与增长思维。"
+        ].join("\n");
+
+        document.getElementById("scoreValue").textContent = total + " / 40";
+        document.getElementById("scoreValue").className = "metric-value " + scoreClass;
+        document.getElementById("levelValue").textContent = level;
+        document.getElementById("adviceValue").textContent = advice;
+        document.getElementById("summaryText").textContent = summary;
+
+        renderList("strengthList", strengths);
+        renderList("riskList", risks);
+        renderList("questionList", questions);
+        renderScores(scores);
+
+        const report =
+`# 候选人评估摘要
+
+- 综合评分：${total} / 40
+- 匹配等级：${level}
+- 筛选建议：${advice}
+
+# 候选人关键信息提炼
+${summary}
+
+# 最强匹配点
+${strengths.map((item, index) => `${index + 1}. ${item}`).join("\n")}
+
+# 主要风险点
+${risks.map((item, index) => `${index + 1}. ${item}`).join("\n")}
+
+# 建议重点验证的面试问题
+${questions.map((item, index) => `${index + 1}. ${item}`).join("\n")}
+`;
+
+        document.getElementById("reportText").textContent = report;
+
+        loading.classList.remove("show");
+        resultWrap.classList.add("show");
+        resultWrap.scrollIntoView({ behavior: "smooth" });
+      }, 900);
+    }
+
+    function renderList(id, items) {
+      const el = document.getElementById(id);
+      el.innerHTML = items.map(item => `<li>${item}</li>`).join("");
+    }
+
+    function renderScores(scores) {
+      const config = [
+        ["内容运营能力", scores.contentOps],
+        ["招聘/筛选相关性", scores.recruiting],
+        ["00后用户理解", scores.genz],
+        ["AI工具应用", scores.ai],
+        ["表达与传播感", scores.expression],
+        ["数据意识", scores.data],
+        ["主动性/自驱力", scores.ownership],
+        ["综合岗位匹配", scores.overall]
+      ];
+
+      const grid = document.getElementById("scoreGrid");
+      grid.innerHTML = config.map(([name, value]) => `
+        <div class="score-item">
+          <div class="name">${name}</div>
+          <div class="value">${value} / 5</div>
+          <div class="bar">
+            <div class="bar-fill" style="width:${value * 20}%"></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function resetAll() {
+      document.getElementById("jd").value = "";
+      document.getElementById("resume").value = "";
+      document.getElementById("resultWrap").classList.remove("show");
+      document.getElementById("loading").classList.remove("show");
+    }
+
+    function copyReport() {
+      const text = document.getElementById("reportText").textContent;
+      if (!text) {
+        alert("请先生成评估结果，再复制报告。");
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        alert("评估报告已复制。");
+      }).catch(() => {
+        alert("复制失败，请手动复制。");
+      });
+    }
+  </script>
 
 </body>
 </html>
